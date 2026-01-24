@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Kapcsolat{% endblock %}
+
+{% block content %}
+<div class="row gy-4">
+  <div class="col-lg-7">
+    <h1 class="mb-3">Kapcsolat</h1>
+    <p class="lead">Üdvözlünk! Ha kérdésed van a foglalással kapcsolatban, írhatsz nekünk az alábbi űrlapon keresztül vagy használd az alábbi elérhetőségeket.</p>
+
+    <div class="card p-4 mt-3">
+      <form method="post" action="{{ url_for('contact') }}">
+        <div class="mb-3">
+          <label class="form-label">Név</label>
+          <input type="text" name="name" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Email</label>
+          <input type="email" name="email" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Üzenet</label>
+          <textarea name="message" class="form-control" rows="6" required></textarea>
+        </div>
+        <button class="btn btn-primary">Küldés</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <h5>Elérhetőségek</h5>
+    <div class="card p-3 mt-3">
+      <p class="mb-1"><strong>Telefon:</strong> +36 30 123 4567</p>
+      <p class="mb-1"><strong>Email:</strong> info@vendeghaz.hu</p>
+      <p class="mb-1"><strong>Cím:</strong> 1234 Budapest, Minta utca 12.</p>
+      <hr>
+      <p class="mb-1"><strong>Nyitvatartás:</strong><br> H–P: 9:00–17:00<br> Sz: zárva</p>
+    </div>
+
+    <div class="mt-4">
+      <h6>Gyors tipp</h6>
+      <p class="small text-muted">Ha foglalást szeretnél, látogass el a <a href="{{ url_for('rooms') }}">Szobák</a> oldalra.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

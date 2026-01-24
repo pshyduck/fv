@@ -140,6 +140,35 @@ def room_detail(room_id):
         disabled_ranges=disabled_ranges
     )
 
+
+@app.route('/contact', methods=['GET', 'POST'])
+def contact():
+    if request.method == 'POST':
+        name = request.form.get('name')
+        email = request.form.get('email')
+        message = request.form.get('message')
+
+        if not name or not email or not message:
+            flash('Kérlek tölts ki minden mezőt.', 'danger')
+            return redirect(url_for('contact'))
+
+        # Send email to admin if configured
+        if ADMIN_EMAIL:
+            try:
+                msg = Message(subject=f"Kapcsolat: {name}",
+                              recipients=[ADMIN_EMAIL],
+                              body=f"Név: {name}\nEmail: {email}\n\n{message}")
+                mail.send(msg)
+            except Exception:
+                # Don't raise; show friendly message
+                flash('Hiba történt az üzenet küldése közben, de az üzenet elmentve helyben.', 'warning')
+                return redirect(url_for('contact'))
+
+        flash('Köszönjük az üzenetedet — hamarosan válaszolunk.', 'success')
+        return redirect(url_for('contact'))
+
+    return render_template('contact.html')
+
 # ---- ADMIN ROUTES ----
 @app.route("/admin/login", methods=["GET", "POST"])
 def admin_login():
