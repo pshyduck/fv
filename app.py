@@ -71,6 +71,15 @@ rooms_data = [
     },
 ]
 
+# ---- PUBLIC ROUTES ----
+@app.route("/")
+def index():
+    return render_template("index.html")
+
+@app.route("/rooms")
+def rooms():
+    return render_template("rooms.html", rooms=rooms_data)
+
 @app.route("/rooms/<int:room_id>", methods=["GET", "POST"])
 def room_detail(room_id):
     room = next((r for r in rooms_data if r["id"] == room_id), None)
@@ -114,7 +123,6 @@ def room_detail(room_id):
         db.session.add(booking)
         db.session.commit()
 
-        # Admin értesítése
         if ADMIN_EMAIL:
             msg = Message(
                 subject="Új foglalás",
@@ -122,21 +130,6 @@ def room_detail(room_id):
                 body=f"{room['name']} – {booking.name}"
             )
             mail.send(msg)
-
-            # Vendég értesítése
-            guest_msg = Message(
-                subject="Foglalás visszaigazolása",
-                recipients=[booking.email],
-                body=(
-                    f"Kedves {booking.name}!\n\n"
-                    f"Köszönjük a foglalását a(z) {room['name']} szobába.\n"
-                    f"Érkezés: {booking.start_date}\n"
-                    f"Távozás: {booking.end_date}\n\n"
-                    "Hamarosan felvesszük Önnel a kapcsolatot.\n"
-                    "Üdvözlettel,\nFüzesiv Ház"
-                )
-            )
-            mail.send(guest_msg)
 
         flash("Foglalás elküldve.", "success")
         return redirect(url_for("room_detail", room_id=room_id))
@@ -146,6 +139,7 @@ def room_detail(room_id):
         room=room,
         disabled_ranges=disabled_ranges
     )
+
 # ---- ADMIN ROUTES ----
 @app.route("/admin/login", methods=["GET", "POST"])
 def admin_login():
