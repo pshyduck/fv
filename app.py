@@ -168,7 +168,7 @@ def admin_dashboard():
         return redirect(url_for("admin_login"))
 
     bookings = Booking.query.order_by(Booking.id.desc()).all()
-    return render_template("admin_dashboard.html", bookings=bookings)
+    return render_template("admin_bookings.html", bookings=bookings)
 
 @app.route("/admin/approve/<int:booking_id>")
 def admin_approve(booking_id):
