@@ -20,13 +20,33 @@
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4">
   <div class="container">
-    <a class="navbar-brand" href="{{ url_for('index') }}">Vendégház</a>
-    <div>
-      <a class="btn btn-outline-light btn-sm" href="{{ url_for('rooms') }}">
-        Szobák
-      </a>
+    <a class="navbar-brand d-flex align-items-center" href="{{ url_for('index') }}">
+      <span class="brand-badge">VH</span>
+      <span class="brand-text">Vendégház</span>
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="mainNav">
+      <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center">
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('index') }}">Kezdőlap</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('rooms') }}">Szobák</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Kapcsolat</a>
+        </li>
+      </ul>
+
+      <div class="d-flex ms-lg-3">
+        <a class="btn btn-primary" href="{{ url_for('rooms') }}">Foglalás</a>
+      </div>
     </div>
   </div>
 </nav>
