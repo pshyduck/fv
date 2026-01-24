@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}{{ room.name }}{% endblock %}
+
+{% block content %}
+<h1 class="mb-3">{{ room.name }}</h1>
+
+<p>{{ room.description }}</p>
+
+<form method="post" class="card p-4 shadow-sm">
+  <div class="mb-3">
+    <label class="form-label">Név</label>
+    <input type="text" name="name" class="form-control" required>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Email</label>
+    <input type="email" name="email" class="form-control" required>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Érkezés dátuma</label>
+    <input
+      type="text"
+      id="start_date"
+      name="start_date"
+      class="form-control"
+      required
+    >
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Távozás dátuma</label>
+    <input
+      type="text"
+      id="end_date"
+      name="end_date"
+      class="form-control"
+      required
+    >
+  </div>
+
+  <button type="submit" class="btn btn-primary">
+    Foglalás elküldése
+  </button>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const disabledRanges = {{ disabled_ranges | tojson }};
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const startPicker = flatpickr("#start_date", {
+      minDate: "today",
+      dateFormat: "Y-m-d",
+      disable: disabledRanges,
+      onChange: function (selectedDates) {
+        endPicker.set("minDate", selectedDates[0]);
+      }
+    });
+
+    const endPicker = flatpickr("#end_date", {
+      minDate: "today",
+      dateFormat: "Y-m-d",
+      disable: disabledRanges
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Szobák{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Szobáink</h1>
+
+<div class="row">
+  {% for room in rooms %}
+    <div class="col-md-4">
+      <div class="card mb-4">
+        <img
+          src="{{ url_for('static', filename=room.image) }}"
+          class="card-img-top"
+          alt="{{ room.name }}">
+
+        <div class="card-body">
+          <h5 class="card-title">{{ room.name }}</h5>
+          <p class="card-text">{{ room.description }}</p>
+
+          <a href="{{ url_for('room_detail', room_id=room.id) }}" class="btn btn-outline-primary">
+            Részletek
+          </a>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}
