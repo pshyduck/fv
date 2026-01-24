@@ -133,6 +133,21 @@ def room_detail(room_id):
 
         flash("Foglalás elküldve.", "success")
         return redirect(url_for("room_detail", room_id=room_id))
+    
+            # Vendég értesítése
+    guest_msg = Message(
+        subject="Foglalás visszaigazolása",
+        recipients=[booking.email],
+        body=(
+            f"Kedves {booking.name}!\n\n"
+            f"Köszönjük a foglalását a(z) {room['name']} szobába.\n"
+            f"Érkezés: {booking.start_date}\n"
+            f"Távozás: {booking.end_date}\n\n"
+            "Hamarosan felvesszük Önnel a kapcsolatot.\n"
+            "Üdvözlettel,\nFüzesiv Ház"
+        )
+    )
+    mail.send(guest_msg)
 
     return render_template(
         "room_detail.html",
