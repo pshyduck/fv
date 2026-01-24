@@ -43,18 +43,18 @@
 
       <!-- MŰVELETEK -->
       <td>
-        {% if booking.status != "approved" %}
-          <a href="{{ url_for('approve_booking', booking_id=booking.id) }}"
-             class="btn btn-sm btn-success mb-1">
-            Jóváhagyás
-          </a>
-        {% endif %}
+  {% if booking.status != "approved" %}
+  <a href="{{ url_for('admin_approve', booking_id=booking.id) }}"
+     class="btn btn-sm btn-success mb-1">
+    Jóváhagyás
+  </a>
+{% endif %}
 
-        <a href="{{ url_for('delete_booking', booking_id=booking.id) }}"
-           class="btn btn-sm btn-danger"
-           onclick="return confirm('Biztosan törlöd ezt a foglalást?');">
-          Törlés
-        </a>
+<a href="{{ url_for('admin_delete', booking_id=booking.id) }}"
+   class="btn btn-sm btn-danger"
+   onclick="return confirm('Biztosan törlöd ezt a foglalást?');">
+  Törlés
+      </a>
       </td>
     </tr>
     {% endfor %}
