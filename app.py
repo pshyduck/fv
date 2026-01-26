@@ -169,14 +169,18 @@ def contact():
 
     return render_template('contact.html')
 
-# ---- ADMIN ROUTES ----
+@app.route('/accessibility')
+def accessibility():
+    return render_template('accessibility.html')
+
 @app.route("/admin/login", methods=["GET", "POST"])
 def admin_login():
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
 
-        if username == ADMIN_USERNAME and check_password_hash(ADMIN_PASSWORD_HASH, password):
+        # Itt most sima szöveges jelszóval hasonlítunk össze
+        if username == os.getenv("ADMIN_USERNAME") and password == os.getenv("ADMIN_PASSWORD"):
             session["admin"] = True
             flash("Sikeres bejelentkezés.", "success")
             return redirect(url_for("admin_dashboard"))

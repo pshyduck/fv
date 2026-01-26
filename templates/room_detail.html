@@ -1,69 +1,39 @@
 {% extends "base.html" %}
-{% block title %}{{ room.name }}{% endblock %}
-
 {% block content %}
-<h1 class="mb-3">{{ room.name }}</h1>
-
-<p>{{ room.description }}</p>
-
-<form method="POST" class="card p-4 shadow-sm">
-  <div class="mb-3">
-    <label class="form-label">Név</label>
-    <input type="text" name="name" class="form-control" required>
-  </div>
-
-  <div class="mb-3">
-    <label class="form-label">Email</label>
-    <input type="email" name="email" class="form-control" required>
-  </div>
-
-  <div class="mb-3">
-    <label class="form-label">Érkezés dátuma</label>
-    <input
-      type="text"
-      id="start_date"
-      name="start_date"
-      class="form-control"
-      required
-    >
-  </div>
-
-  <div class="mb-3">
-    <label class="form-label">Távozás dátuma</label>
-    <input
-      type="text"
-      id="end_date"
-      name="end_date"
-      class="form-control"
-      required
-    >
-  </div>
-
-  <button type="submit" class="btn btn-primary">
-    Foglalás elküldése
-  </button>
-</form>
+<div class="row">
+    <div class="col-md-7">
+        <h1 class="display-5 fw-bold mb-3">{{ room.name }}</h1>
+        <div class="rounded-4 overflow-hidden mb-4 shadow">
+            <img src="{{ url_for('static', filename=room.image) }}" class="img-fluid w-100" alt="{{ room.name }}">
+        </div>
+        <p class="fs-5">{{ room.description }}</p>
+    </div>
+    <div class="col-md-5">
+        <div class="card p-4 shadow border-0">
+            <h3 class="mb-4">Időpont foglalása</h3>
+            <div class="alert alert-info py-2">A <span class="text-danger fw-bold">pirossal áthúzott</span> napok már foglaltak.</div>
+            <form method="post">
+                <div class="mb-3"><label class="form-label">Név</label><input type="text" name="name" class="form-control" required></div>
+                <div class="mb-3"><label class="form-label">Email</label><input type="email" name="email" class="form-control" required></div>
+                <div class="row">
+                    <div class="col-6 mb-3"><label class="form-label">Érkezés</label><input type="text" id="start_date" name="start_date" class="form-control bg-white" readonly required></div>
+                    <div class="col-6 mb-3"><label class="form-label">Távozás</label><input type="text" id="end_date" name="end_date" class="form-control bg-white" readonly required></div>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 py-3 fw-bold shadow-sm">Foglalási igény elküldése</button>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-  const disabledRanges = {{ disabled_ranges | tojson }};
-
-  document.addEventListener("DOMContentLoaded", function () {
-    const startPicker = flatpickr("#start_date", {
-      minDate: "today",
-      dateFormat: "Y-m-d",
-      disable: disabledRanges,
-      onChange: function (selectedDates) {
-        endPicker.set("minDate", selectedDates[0]);
-      }
-    });
-
-    const endPicker = flatpickr("#end_date", {
-      minDate: "today",
-      dateFormat: "Y-m-d",
-      disable: disabledRanges
-    });
-  });
+    const disabledRanges = {{ disabled_ranges | tojson }};
+    const config = {
+        locale: "hu", minDate: "today", dateFormat: "Y-m-d",
+        disable: disabledRanges.map(r => ({ from: r.from, to: r.to }))
+    };
+    flatpickr("#start_date", config);
+    flatpickr("#end_date", config);
 </script>
 {% endblock %}
