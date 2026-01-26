@@ -112,6 +112,7 @@ def room_detail(room_id):
         guest_email = request.form["email"]
         start_date = request.form["start_date"]
         end_date = request.form["end_date"]
+        guests = request.form.get("guests", "1")
 
         if start_date >= end_date:
             flash("Hibás dátumtartomány.", "danger")
@@ -128,12 +129,19 @@ def room_detail(room_id):
         db.session.commit()
 
         # Értesítők küldése
+     # Értesítők küldése
         try:
-            # Visszaigazolás a vendégnek
+            # Visszaigazolás a vendégnek (HTML sablonnal)
             guest_msg = Message("Foglalási igény - Füzesi Vendégház", recipients=[guest_email])
-            guest_msg.body = f"Kedves {guest_name}!\n\nFoglalási igényét rögzítettük: {start_date} - {end_date}.\n\nHamarosan jelentkezünk a jóváhagyással!"
+            
+            # Itt a módosítás: .body helyett .html és render_template
+            guest_msg.html = render_template("email_confirmation.html", 
+                                           name=guest_name, 
+                                           start=start_date, 
+                                           end=end_date,
+                                           guests=guests)
+            
             mail.send(guest_msg)
-
             # Értesítés az adminnak
             if ADMIN_EMAIL:
                 admin_msg = Message("ÚJ FOGLALÁS", recipients=[ADMIN_EMAIL])
