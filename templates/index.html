@@ -1,20 +1,38 @@
-<!doctype html>
-<html lang="hu">
-<head>
-  <meta charset="utf-8">
-  <title>Vendégház</title>
-
- {% extends "base.html" %}
+{% extends "base.html" %}
 
 {% block title %}Főoldal{% endblock %}
 
 {% block content %}
-  <h1>Üdvözlünk a Vendégházban</h1>
-  <p class="lead">
-    Pihenés, nyugalom, természetközeli élmény.
-  </p>
+<div class="hero-section text-center shadow">
+  <div class="py-5">
+    <h1 class="display-3 fw-bold">Füzesi Vendégház</h1>
+    <p class="fs-4 italic">A nyugalom szigete a természet lágy ölén</p>
+    <hr class="my-4 mx-auto" style="width: 30%; border-top: 3px solid var(--accent-green);">
+    <a href="{{ url_for('rooms') }}" class="btn btn-lg btn-booking mt-3">Fedezze fel szobáinkat</a>
+  </div>
+</div>
+
+<div class="row mt-5 g-4 text-center">
+    <div class="col-md-4">
+        <div class="feature-card p-4 h-100">
+            <div class="fs-1">🌿</div>
+            <h3 class="h4 mt-3">Friss Levegő</h3>
+            <p class="text-muted">Tökéletes helyszín a városi zaj elöli meneküléshez.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="feature-card p-4 h-100">
+            <div class="fs-1">🏡</div>
+            <h3 class="h4 mt-3">Hagyomány</h3>
+            <p class="text-muted">Autentikus falusi hangulat, modern kényelemmel.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="feature-card p-4 h-100">
+            <div class="fs-1">🔥</div>
+            <h3 class="h4 mt-3">Kikapcsolódás</h3>
+            <p class="text-muted">Bográcsozás, túrázás és csillagos égbolt.</p>
+        </div>
+    </div>
+</div>
 {% endblock %}
-
-
-</body>
-</html>
