@@ -10,8 +10,19 @@
     </div>
     <div class="col-md-5">
         <div class="card p-4 shadow border-0">
-            <h3 class="mb-4">Időpont foglalása</h3>
-            <div class="alert alert-info py-2">A <span class="text-danger fw-bold">pirossal áthúzott</span> napok már foglaltak.</div>
+            <h3 class="mb-2">Időpont foglalása</h3>
+            
+            <div class="mb-4">
+                <label class="form-label small fw-bold text-muted text-uppercase">Szabad napok a közeljövőben:</label>
+                <div class="d-flex flex-wrap gap-1">
+                    {% for date in available_days %}
+                        <span class="badge rounded-pill bg-success-subtle text-success border border-success">{{ date }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="alert alert-info py-2 small mb-4">A <span class="text-danger fw-bold">pirossal áthúzott</span> napok már foglaltak.</div>
+            
             <form method="post">
                 <div class="mb-3"><label class="form-label">Név</label><input type="text" name="name" class="form-control" required></div>
                 <div class="mb-3"><label class="form-label">Email</label><input type="email" name="email" class="form-control" required></div>
@@ -30,8 +41,10 @@
 <script>
     const disabledRanges = {{ disabled_ranges | tojson }};
     const config = {
-        locale: "hu", minDate: "today", dateFormat: "Y-m-d",
-        disable: disabledRanges.map(r => ({ from: r.from, to: r.to }))
+        locale: "hu",
+        minDate: "today",
+        dateFormat: "Y-m-d",
+        disable: disabledRanges.map(range => ({ from: range.from, to: range.to }))
     };
     flatpickr("#start_date", config);
     flatpickr("#end_date", config);

@@ -1,4 +1,5 @@
 import os
+from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from flask import (
     Flask, render_template, abort, request,
@@ -6,20 +7,15 @@ from flask import (
 )
 from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail, Message
-from werkzeug.security import check_password_hash
 
-# ---- ENV ----
+# ---- KONFIGURÁCIÓ BETÖLTÉSE ----
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = os.getenv("FLASK_SECRET_KEY")
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "alapertelmezett-titok")
 
-# ---- DATABASE ----
-database_url = os.getenv("DATABASE_URL")
-
-if not database_url:
-    database_url = "sqlite:///local.db"
-
+# ---- ADATBÁZIS BEÁLLÍTÁSA ----
+database_url = os.getenv("DATABASE_URL", "sqlite:///local.db")
 if database_url.startswith("postgres://"):
     database_url = database_url.replace("postgres://", "postgresql://", 1)
 
@@ -28,7 +24,21 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
 
-# ---- MODEL ----
+# ---- LEVELEZÉS BEÁLLÍTÁSA ----
+app.config["MAIL_SERVER"] = os.getenv("MAIL_SERVER", "smtp.gmail.com")
+app.config["MAIL_PORT"] = int(os.getenv("MAIL_PORT", 587))
+app.config["MAIL_USE_TLS"] = True
+app.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME")
+app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD")
+app.config["MAIL_DEFAULT_SENDER"] = os.getenv("MAIL_USERNAME")
+
+mail = Mail(app)
+
+ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
+ADMIN_USERNAME = os.getenv("ADMIN_USERNAME")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
+
+# ---- ADATMODELL ----
 class Booking(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     room_name = db.Column(db.String(100), nullable=False)
@@ -41,44 +51,49 @@ class Booking(db.Model):
 with app.app_context():
     db.create_all()
 
-# ---- MAIL ----
-app.config["MAIL_SERVER"] = os.getenv("MAIL_SERVER")
-app.config["MAIL_PORT"] = int(os.getenv("MAIL_PORT", 587))
-app.config["MAIL_USE_TLS"] = True
-app.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME")
-app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD")
-app.config["MAIL_DEFAULT_SENDER"] = os.getenv("MAIL_USERNAME")
-
-mail = Mail(app)
-
-ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
-ADMIN_USERNAME = os.getenv("ADMIN_USERNAME")
-ADMIN_PASSWORD_HASH = os.getenv("ADMIN_PASSWORD_HASH")
-
-# ---- ROOMS ----
+# ---- STATIKUS ADATOK (Szobák) ----
 rooms_data = [
-    {
-        "id": 1,
-        "name": "Kétágyas szoba",
-        "description": "Kényelmes szoba 2 fő részére.",
-        "image": "images/room1.jpg",
-    },
-    {
-        "id": 2,
-        "name": "Családi szoba",
-        "description": "Tágas szoba 4 főnek.",
-        "image": "images/room2.jpg",
-    },
+    {"id": 1, "name": "Kétágyas szoba", "description": "Kényelmes szoba 2 fő részére.", "image": "images/room1.jpg"},
+    {"id": 2, "name": "Családi szoba", "description": "Tágas szoba 4 főnek.", "image": "images/room2.jpg"},
 ]
 
-# ---- PUBLIC ROUTES ----
+# ---- SEGÉDFÜGGVÉNY A SZABAD HELYEKHEZ ----
+def get_available_dates(room_name, days=30):
+    today = datetime.now().date()
+    next_period = [today + timedelta(days=i) for i in range(days)]
+    
+    # Csak a jóváhagyott foglalásokat vesszük figyelembe foglaltságként
+    bookings = Booking.query.filter_by(room_name=room_name, status="approved").all()
+    
+    booked_dates = set()
+    for b in bookings:
+        try:
+            start = datetime.strptime(b.start_date, '%Y-%m-%d').date()
+            end = datetime.strptime(b.end_date, '%Y-%m-%d').date()
+            curr = start
+            while curr < end:
+                booked_dates.add(curr)
+                curr += timedelta(days=1)
+        except Exception as e:
+            print(f"Dátum hiba: {e}")
+            continue
+            
+    return [d.strftime('%m.%d.') for d in next_period if d not in booked_dates]
+
+# ---- PUBLIKUS ÚTVONALAK ----
 @app.route("/")
 def index():
     return render_template("index.html")
 
 @app.route("/rooms")
 def rooms():
-    return render_template("rooms.html", rooms=rooms_data)
+    rooms_with_availability = []
+    for room in rooms_data:
+        room_copy = room.copy()
+        # Az első 7 szabad napot mutatjuk a kártyán
+        room_copy['available_preview'] = get_available_dates(room['name'], 30)[:7]
+        rooms_with_availability.append(room_copy)
+    return render_template("rooms.html", rooms=rooms_with_availability)
 
 @app.route("/rooms/<int:room_id>", methods=["GET", "POST"])
 def room_detail(room_id):
@@ -87,13 +102,14 @@ def room_detail(room_id):
         abort(404)
 
     bookings = Booking.query.filter_by(room_name=room["name"]).all()
-
-    disabled_ranges = [
-        {"from": b.start_date, "to": b.end_date}
-        for b in bookings if b.status == "approved"
-    ]
+    disabled_ranges = [{"from": b.start_date, "to": b.end_date} for b in bookings if b.status == "approved"]
+    
+    # 14 napnyi szabad hely a részletes nézethez
+    available_days = get_available_dates(room['name'], 30)[:14]
 
     if request.method == "POST":
+        guest_name = request.form["name"]
+        guest_email = request.form["email"]
         start_date = request.form["start_date"]
         end_date = request.form["end_date"]
 
@@ -101,45 +117,38 @@ def room_detail(room_id):
             flash("Hibás dátumtartomány.", "danger")
             return redirect(url_for("room_detail", room_id=room_id))
 
-        conflict = Booking.query.filter(
-            Booking.room_name == room["name"],
-            Booking.end_date > start_date,
-            Booking.start_date < end_date,
-            Booking.status == "approved",
-        ).first()
-
-        if conflict:
-            flash("Ez az időszak már foglalt.", "danger")
-            return redirect(url_for("room_detail", room_id=room_id))
-
         booking = Booking(
-            room_name=room["name"],
-            name=request.form["name"],
-            email=request.form["email"],
-            start_date=start_date,
-            end_date=end_date,
+            room_name=room["name"], 
+            name=guest_name, 
+            email=guest_email, 
+            start_date=start_date, 
+            end_date=end_date
         )
-
         db.session.add(booking)
         db.session.commit()
 
-        if ADMIN_EMAIL:
-            msg = Message(
-                subject="Új foglalás",
-                recipients=[ADMIN_EMAIL],
-                body=f"{room['name']} – {booking.name}"
-            )
-            mail.send(msg)
+        # Értesítők küldése
+        try:
+            # Visszaigazolás a vendégnek
+            guest_msg = Message("Foglalási igény - Füzesi Vendégház", recipients=[guest_email])
+            guest_msg.body = f"Kedves {guest_name}!\n\nFoglalási igényét rögzítettük: {start_date} - {end_date}.\n\nHamarosan jelentkezünk a jóváhagyással!"
+            mail.send(guest_msg)
 
-        flash("Foglalás elküldve.", "success")
+            # Értesítés az adminnak
+            if ADMIN_EMAIL:
+                admin_msg = Message("ÚJ FOGLALÁS", recipients=[ADMIN_EMAIL])
+                admin_msg.body = f"Új igény érkezett!\nVendég: {guest_name}\nSzoba: {room['name']}\nIdő: {start_date} - {end_date}"
+                mail.send(admin_msg)
+        except Exception as e:
+            print(f"Email hiba: {e}")
+
+        flash("Foglalás elküldve! Kérjük, várja meg e-mailes visszaigazolásunkat.", "success")
         return redirect(url_for("room_detail", room_id=room_id))
 
-    return render_template(
-        "room_detail.html",
-        room=room,
-        disabled_ranges=disabled_ranges
-    )
-
+    return render_template("room_detail.html", 
+                           room=room, 
+                           disabled_ranges=disabled_ranges, 
+                           available_days=available_days)
 
 @app.route('/contact', methods=['GET', 'POST'])
 def contact():
@@ -147,88 +156,74 @@ def contact():
         name = request.form.get('name')
         email = request.form.get('email')
         message = request.form.get('message')
-
-        if not name or not email or not message:
-            flash('Kérlek tölts ki minden mezőt.', 'danger')
-            return redirect(url_for('contact'))
-
-        # Send email to admin if configured
         if ADMIN_EMAIL:
             try:
-                msg = Message(subject=f"Kapcsolat: {name}",
-                              recipients=[ADMIN_EMAIL],
-                              body=f"Név: {name}\nEmail: {email}\n\n{message}")
+                msg = Message(f"Üzenet: {name}", recipients=[ADMIN_EMAIL])
+                msg.body = f"Feladó: {name} <{email}>\n\n{message}"
                 mail.send(msg)
-            except Exception:
-                # Don't raise; show friendly message
-                flash('Hiba történt az üzenet küldése közben, de az üzenet elmentve helyben.', 'warning')
-                return redirect(url_for('contact'))
-
-        flash('Köszönjük az üzenetedet — hamarosan válaszolunk.', 'success')
+            except Exception as e:
+                print(e)
+        flash('Üzenet elküldve!', 'success')
         return redirect(url_for('contact'))
-
     return render_template('contact.html')
 
-@app.route('/accessibility')
-def accessibility():
-    return render_template('accessibility.html')
-
+# ---- ADMINISZTRÁCIÓ ----
 @app.route("/admin/login", methods=["GET", "POST"])
 def admin_login():
     if request.method == "POST":
-        username = request.form.get("username")
-        password = request.form.get("password")
-
-        # Itt most sima szöveges jelszóval hasonlítunk össze
-        if username == os.getenv("ADMIN_USERNAME") and password == os.getenv("ADMIN_PASSWORD"):
+        if request.form.get("username") == ADMIN_USERNAME and request.form.get("password") == ADMIN_PASSWORD:
             session["admin"] = True
-            flash("Sikeres bejelentkezés.", "success")
             return redirect(url_for("admin_dashboard"))
-        else:
-            flash("Hibás felhasználónév vagy jelszó.", "danger")
-
+        flash("Hibás adatok.", "danger")
     return render_template("admin_login.html")
-
-@app.route("/admin/logout")
-def admin_logout():
-    session.pop("admin", None)
-    flash("Kijelentkeztél.", "info")
-    return redirect(url_for("admin_login"))
 
 @app.route("/admin")
 def admin_dashboard():
-    if not session.get("admin"):
+    if not session.get("admin"): 
         return redirect(url_for("admin_login"))
-
-    bookings = Booking.query.order_by(Booking.id.desc()).all()
-    return render_template("admin_bookings.html", bookings=bookings)
+    return render_template("admin_bookings.html", bookings=Booking.query.order_by(Booking.id.desc()).all())
 
 @app.route("/admin/approve/<int:booking_id>")
 def admin_approve(booking_id):
-    if not session.get("admin"):
+    if not session.get("admin"): 
         return redirect(url_for("admin_login"))
-
     booking = Booking.query.get_or_404(booking_id)
     booking.status = "approved"
     db.session.commit()
-
-    flash("Foglalás jóváhagyva.", "success")
+    
+    try:
+        msg = Message("Foglalás JÓVÁHAGYVA - Füzesi Vendégház", recipients=[booking.email])
+        msg.body = f"Kedves {booking.name}!\n\nÖrömmel értesítjük, hogy foglalását elfogadtuk a {booking.start_date} - {booking.end_date} időszakra.\n\nVárjuk szeretettel!"
+        mail.send(msg)
+        flash("Jóváhagyva és email elküldve.", "success")
+    except Exception as e: 
+        print(e)
+        flash("Jóváhagyva, de az email nem ment el.", "warning")
+    
     return redirect(url_for("admin_dashboard"))
 
 @app.route("/admin/delete/<int:booking_id>")
 def admin_delete(booking_id):
-    if not session.get("admin"):
+    if not session.get("admin"): 
         return redirect(url_for("admin_login"))
-
     booking = Booking.query.get_or_404(booking_id)
+    
+    try:
+        msg = Message("Tájékoztatás foglalásról - Füzesi Vendégház", recipients=[booking.email])
+        msg.body = f"Kedves {booking.name}!\n\nSajnáljuk, de a kért időpontot ({booking.start_date} - {booking.end_date}) jelenleg nem tudjuk visszaigazolni.\n\nMegértését köszönjük!"
+        mail.send(msg)
+    except Exception as e: 
+        print(e)
+
     db.session.delete(booking)
     db.session.commit()
-
-    flash("Foglalás törölve.", "info")
+    flash("Törölve és elutasító email elküldve.", "info")
     return redirect(url_for("admin_dashboard"))
 
-# ---- MAIN ----
+@app.route("/admin/logout")
+def admin_logout():
+    session.pop("admin", None)
+    return redirect(url_for("admin_login"))
+
 if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
     app.run(debug=True)

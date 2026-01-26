@@ -6,14 +6,28 @@
 
 <div class="row">
   {% for room in rooms %}
-    <div class="col-md-6 mb-4"> <div class="card shadow">
+    <div class="col-md-6 mb-4">
+      <div class="card shadow border-0 overflow-hidden">
         <img src="{{ url_for('static', filename=room.image) }}" class="card-img-top" alt="{{ room.name }}">
         <div class="card-body p-4">
           <h2 class="card-title h3">{{ room.name }}</h2>
           <p class="card-text text-muted">{{ room.description }}</p>
-          <div class="d-flex justify-content-between align-items-center">
-            <a href="{{ url_for('room_detail', room_id=room.id) }}" class="btn btn-primary px-4">Foglalom</a>
-            <span class="text-success fw-bold"><i class="bi bi-check-circle"></i> Szabad helyek</span>
+          
+          <div class="mb-3">
+            <small class="text-success fw-bold d-block mb-1"><i class="bi bi-calendar-check"></i> Közeljövőben szabad:</small>
+            <div class="d-flex flex-wrap gap-1">
+              {% if room.available_preview %}
+                {% for date in room.available_preview %}
+                  <span class="badge bg-light text-success border border-success-subtle">{{ date }}</span>
+                {% endfor %}
+              {% else %}
+                <span class="badge bg-light text-danger">Megtelt</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center mt-3">
+            <a href="{{ url_for('room_detail', room_id=room.id) }}" class="btn btn-primary px-4 shadow-sm">Részletek és foglalás</a>
           </div>
         </div>
       </div>
