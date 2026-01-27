@@ -136,10 +136,10 @@ def room_detail(room_id):
             
             # Itt a módosítás: .body helyett .html és render_template
             guest_msg.html = render_template("email_confirmation.html", 
-                                           name=guest_name, 
-                                           start=start_date, 
-                                           end=end_date,
-                                           guests=guests)
+                                           name=guest_name,
+                                           room_name=room['name'],
+                                           start_date=start_date, 
+                                           end_date=end_date)
             
             mail.send(guest_msg)
             # Értesítés az adminnak

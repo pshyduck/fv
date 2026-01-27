@@ -3,13 +3,14 @@
 {% block title %}Kapcsolat{% endblock %}
 
 {% block content %}
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap');
 
     .contact-page-container {
         font-family: 'Montserrat', sans-serif !important;
         color: #2c1e1a;
-        /* Hozzáadva: Biztosítja, hogy legyen elég hely a lábléc előtt */
         padding-bottom: 50px; 
     }
 
@@ -28,12 +29,11 @@
 </style>
 
 <div class="contact-page-container">
-    <div class="row gy-4">
-      <div class="col-lg-7">
+    <div class="row gy-4 overflow-hidden"> <div class="col-lg-7" data-aos="fade-right" data-aos-duration="1000">
         <h1 class="mb-3">Kapcsolat</h1>
         <p class="lead">Üdvözlünk! Ha kérdésed van a foglalással kapcsolatban, írhatsz nekünk az alábbi űrlapon keresztül vagy használd az alábbi elérhetőségeket.</p>
 
-       <div class="card p-4 mt-3 shadow-sm border-0 bg-white">
+        <div class="card p-4 mt-3 shadow-sm border-0 bg-white">
           <form method="post" action="{{ url_for('contact') }}">
             <div class="mb-3">
               <label class="form-label">Név</label>
@@ -52,24 +52,34 @@
         </div>
       </div>
 
-      <div class="col-lg-5">
-
-       <div class="card p-3 mt-lg-5 shadow-sm border-0 bg-white">
+      <div class="col-lg-5" data-aos="fade-left" data-aos-duration="1000" data-aos-delay="200">
+        <div class="card p-3 mt-lg-5 shadow-sm border-0 bg-white">
           <p class="mb-2"><strong>Telefon:</strong> <a href="tel:+36205837641" class="text-decoration-none text-dark">+36 20 583 7641</a></p>
           <p class="mb-2"><strong>Email:</strong> <a href="mailto:fuzesivhaz@gmail.com" class="text-decoration-none text-dark">fuzesivhaz@gmail.com</a></p>
           <p class="mb-0"><strong>Cím:</strong> 8412 Veszprém, Füzesi út 49.</p>
         </div>
 
-    <div class="ratio ratio-4x3 rounded shadow-sm overflow-hidden mt-4">
+<div class="ratio ratio-4x3 rounded shadow-sm overflow-hidden mt-4">
       <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2714.1776913961617!2d17.938895576898027!3d47.13478472043877!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47699b344084cbbd%3A0xed66c1b9b81fac5a!2zRsO8emVzaSBWZW5kw6lnaMOheg!5e0!3m2!1shu!2shu!4v1769427549827!5m2!1shu!2shu" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-      
-    </div>
+        </div>
 
-    <div class="mt-4 p-3 bg-light rounded border">
-                <h6 class="fw-bold">Gyors tipp</h6>
-                <p class="small text-muted mb-0">Ha foglalást szeretnél, látogass el a <a href="{{ url_for('rooms') }}" class="fw-bold text-success">Szobák</a> oldalra.</p>
-            </div>
-          </div>
-  </div>
+        <div class="mt-4 p-3 bg-light rounded border">
+          <h6 class="fw-bold">Gyors tipp</h6>
+          <p class="small text-muted mb-0">Ha foglalást szeretnél, látogass el a <a href="{{ url_for('rooms') }}" class="fw-bold text-success">Szobák</a> oldalra.</p>
+        </div>
+      </div>
+
+    </div>
 </div>
+
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        AOS.init({
+            duration: 1000,
+            once: true,
+            offset: 100
+        });
+    });
+</script>
 {% endblock %}

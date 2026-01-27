@@ -12,8 +12,8 @@
         <div class="card p-4 shadow border-0">
             <h3 class="mb-2">Időpont foglalása</h3>
             
-            <div class="mb-4">
-                <label class="form-label small fw-bold text-muted text-uppercase">Szabad napok a közeljövőben:</label>
+            <div class="mb-4 small">
+                <label class="form-label small fw-bold text-muted text-uppercase">Szabad napok:</label>
                 <div class="d-flex flex-wrap gap-1">
                     {% for date in available_days %}
                         <span class="badge rounded-pill bg-success-subtle text-success border border-success">{{ date }}</span>
@@ -21,24 +21,60 @@
                 </div>
             </div>
 
-            <div class="alert alert-info py-2 small mb-4">A <span class="text-danger fw-bold">pirossal áthúzott</span> napok már foglaltak.</div>
-            
-            <form method="post">
-                <div class="mb-3"><label class="form-label">Név</label><input type="text" name="name" class="form-control" required></div>
-                <div class="mb-3"><label class="form-label">Email</label><input type="email" name="email" class="form-control" required></div>
-                <div class="row">
-                    <div class="col-6 mb-3"><label class="form-label">Érkezés</label><input type="text" id="start_date" name="start_date" class="form-control bg-white" readonly required></div>
-                    <div class="col-6 mb-3"><label class="form-label">Távozás</label><input type="text" id="end_date" name="end_date" class="form-control bg-white" readonly required></div>
+            <form id="bookingForm" method="post">
+                <div class="mb-3">
+                    <label class="form-label">Név</label>
+                    <input type="text" name="name" id="guest_name" class="form-control" required>
                 </div>
-                <button type="submit" class="btn btn-primary w-100 py-3 fw-bold shadow-sm">Foglalási igény elküldése</button>
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email" id="guest_email" class="form-control" required>
+                </div>
+                <div class="row">
+                    <div class="col-6 mb-3">
+                        <label class="form-label">Érkezés</label>
+                        <input type="text" id="start_date" name="start_date" class="form-control bg-white" readonly required>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <label class="form-label">Távozás</label>
+                        <input type="text" id="end_date" name="end_date" class="form-control bg-white" readonly required>
+                    </div>
+                </div>
+                <button type="button" onclick="showConfirmation()" class="btn btn-primary w-100 py-3 fw-bold shadow-sm">Foglalási igény elküldése</button>
             </form>
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title">Adatok ellenőrzése</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <p class="text-muted">Kérjük, ellenőrizze az adatait az elküldés előtt:</p>
+        <div class="bg-light p-3 rounded-3">
+            <p class="mb-2"><strong>Név:</strong> <span id="modal_name"></span></p>
+            <p class="mb-2"><strong>Email:</strong> <span id="modal_email"></span></p>
+            <p class="mb-0"><strong>Időpont:</strong> <span id="modal_dates" class="fw-bold text-success"></span></p>
+        </div>
+        <p class="small text-danger mt-3 mb-0">* A küldés után e-mailben fogjuk keresni a részletekkel.</p>
+      </div>
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Módosítás</button>
+        <button type="button" class="btn btn-success px-4 fw-bold" onclick="submitForm()">Minden helyes, küldés</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
 
 {% block scripts %}
 <script>
+    // Flatpickr naptár beállítások
     const disabledRanges = {{ disabled_ranges | tojson }};
     const config = {
         locale: "hu",
@@ -48,5 +84,34 @@
     };
     flatpickr("#start_date", config);
     flatpickr("#end_date", config);
+
+    // MEGERŐSÍTŐ FUNKCIÓK
+    function showConfirmation() {
+        // Értékek kinyerése
+        const name = document.getElementById('guest_name').value;
+        const email = document.getElementById('guest_email').value;
+        const start = document.getElementById('start_date').value;
+        const end = document.getElementById('end_date').value;
+
+        // Ellenőrizzük, hogy ki van-e töltve minden
+        if (!name || !email || !start || !end) {
+            alert("Kérjük, töltsön ki minden mezőt a foglaláshoz!");
+            return;
+        }
+
+        // Adatok beírása a modalba
+        document.getElementById('modal_name').innerText = name;
+        document.getElementById('modal_email').innerText = email;
+        document.getElementById('modal_dates').innerText = start + " - " + end;
+
+        // Modal megnyitása
+        var myModal = new bootstrap.Modal(document.getElementById('confirmModal'));
+        myModal.show();
+    }
+
+    function submitForm() {
+        // Az űrlap tényleges beküldése
+        document.getElementById('bookingForm').submit();
+    }
 </script>
 {% endblock %}
