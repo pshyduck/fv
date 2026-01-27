@@ -145,7 +145,7 @@ def room_detail(room_id):
             # Értesítés az adminnak
             if ADMIN_EMAIL:
                 admin_msg = Message("ÚJ FOGLALÁS", recipients=[ADMIN_EMAIL])
-                admin_msg.body = f"Új igény érkezett!\nVendég: {guest_name}\nSzoba: {room['name']}\nIdő: {start_date} - {end_date}"
+                admin_msg.body = f"Új igény érkezett!\n(https://fuzesivhaz.hu/admin/login) \nVendég: {guest_name}\nSzoba: {room['name']}\nIdő: {start_date} - {end_date}"
                 mail.send(admin_msg)
         except Exception as e:
             print(f"Email hiba: {e}")
