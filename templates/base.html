@@ -9,11 +9,28 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@700&family=Montserrat:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        :root { --dark-wood: #4e342e; --accent-green: #689f38; --cream: #faf7f2; }
-        body { font-family: 'Lora', serif; background-color: var(--cream); color: #2c1e1a; }
+        :root { 
+            --dark-wood: #4e342e; 
+            --accent-green: #689f38; 
+            --cream: #faf7f2; 
+        }
+
+        body { 
+            font-family: 'Lora', serif; 
+            /* HÁTTÉRKÉP BEÁLLÍTÁSA A TELJES OLDALRA */
+            background-image: linear-gradient(rgba(250, 247, 242, 0.8), rgba(250, 247, 242, 0.8)), 
+                              url('https://images.unsplash.com/photo-1516594798947-e65505dbb29d?auto=format&fit=crop&w=1920&q=80');
+            background-attachment: fixed;
+            background-size: cover;
+            background-position: center;
+            color: #2c1e1a; 
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
         .navbar { background-color: var(--dark-wood) !important; border-bottom: 4px solid var(--accent-green); }
         .navbar-brand { font-family: 'Playfair Display', serif; }
-        .hero-section { background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1510798831971-661eb04b3739?q=80&w=1200'); background-size: cover; color: white; padding: 80px 20px; border-radius: 15px; }
         .btn-primary { background-color: var(--accent-green); border: none; }
         .btn-primary:hover { background-color: #558b2f; }
         
@@ -21,64 +38,65 @@
         .flatpickr-day.disabled, .flatpickr-day.flatpickr-disabled {
             background: #f8d7da !important; color: #d9534f !important; text-decoration: line-through; opacity: 0.6;
         }
+
+        /* Letisztult, prémium Navbar */
+        .navbar {
+            background-color: #ffffff !important; /* Tiszta fehér alap */
+            border-bottom: 2px solid #e9ecef;
+            padding: 0.8rem 0;
+        }
+
+        .navbar-brand {
+            font-family: 'Montserrat', serif;
+            font-weight: 700;
+            color: #2c1e1a !important;
+            font-size: 1.6rem;
+        }
+
+        .navbar-brand span {
+            color: #689f38;
+        }
+
+        .nav-link {
+            font-family: 'Montserrat', serif;
+            color: #4e342e !important;
+            font-weight: 500;
+            margin: 0 15px;
+            transition: color 0.2s ease;
+            font-size: 1.1rem;
+        }
+
+        .nav-link:hover {
+            color: #689f38 !important;
+        }
+
+        .btn-reserve {
+            background-color: #689f38;
+            color: white !important;
+            border-radius: 8px;
+            padding: 10px 24px !important;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-reserve:hover {
+            background-color: #558b2f;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(104, 159, 56, 0.2);
+        }
+
+        .simple-footer {
+            background-color: #2c1e1a;
+            color: rgba(250, 247, 242, 0.8);
+            padding: 20px 0;
+            margin-top: auto;
+            border-top: 3px solid #689f38;
+        }
     </style>
 </head>
 <body>
-<style>
-    /* Letisztult, prémium Navbar */
-    .navbar {
-        background-color: #ffffff !important; /* Tiszta fehér alap */
-        border-bottom: 2px solid #e9ecef;
-        padding: 0.8rem 0;
-    }
-
-    .navbar-brand {
-        font-family: 'Montserrat', serif;
-        font-weight: 700;
-        color: #2c1e1a !important;
-        font-size: 1.6rem;
-    }
-
-    .navbar-brand span {
-        color: #689f38; /* A vendégház zöldje */
-    }
-
-    .nav-link {
-        font-family: 'Montserrat', serif;
-        color: #4e342e !important;
-        font-weight: 500;
-        margin: 0 15px;
-        transition: color 0.2s ease;
-        font-size: 1.1rem;
-    }
-
-    .nav-link:hover {
-        color: #689f38 !important;
-    }
-
-    /* Kiemelt gomb a foglaláshoz */
-    .btn-reserve {
-        background-color: #689f38;
-        color: white !important;
-        border-radius: 8px;
-        padding: 10px 24px !important;
-        font-weight: 600;
-        letter-spacing: 0.5px;
-        border: none;
-        transition: all 0.3s ease;
-    }
-
-    .btn-reserve:hover {
-        background-color: #558b2f;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(104, 159, 56, 0.2);
-    }
-
-    .navbar-toggler {
-        border: none;
-        color: #4e342e;
-    }
-</style>
 
 <nav class="navbar navbar-expand-lg sticky-top">
   <div class="container">
@@ -92,50 +110,36 @@
 
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ms-auto align-items-center">
-
         <li class="nav-item">
           <a class="nav-link" href="{{ url_for('contact') }}">Kapcsolat</a>
         </li>
-        
         <li class="nav-item ms-lg-3">
           <a class="btn-reserve nav-link" href="{{ url_for('rooms') }}">Foglalás</a>
         </li>
-
-        {% if session.admin %}
-      
-        {% endif %}
       </ul>
     </div>
   </div>
 </nav>
-<div class="container">
+
+<div class="container py-4">
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}{% for cat, msg in messages %}
             <div class="alert alert-{{ cat }} alert-dismissible fade show shadow-sm">{{ msg }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
         {% endfor %}{% endif %}
     {% endwith %}
+    
     {% block content %}{% endblock %}
 </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/hu.js"></script>
-{% block scripts %}{% endblock %}
-</body>
-<style>
-    /* Minimál lábléc stílus */
-    .simple-footer {
-        background-color: #2c1e1a; /* Sötétbarna alap */
-        color: rgba(250, 247, 242, 0.8); /* Halvány krém szín */
-        padding: 20px 0;
-        margin-top: auto; /* Ez tolja az aljára, ha kevés a tartalom */
-        border-top: 3px solid #689f38; /* A jellegzetes zöld díszcsík */
-    }
-</style>
 
 <footer class="simple-footer">
     <div class="container text-center">
         <p class="mb-0 small">&copy; 2026 Füzesi Vendégház. Minden jog fenntartva.</p>
     </div>
 </footer>
-<body class="d-flex flex-column min-vh-100">
-    </body>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/hu.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

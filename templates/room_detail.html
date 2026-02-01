@@ -1,13 +1,80 @@
 {% extends "base.html" %}
+
 {% block content %}
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+<style>
+    /* Képváltó stílusai */
+    .room-hero-wrap {
+        position: relative;
+        width: 100%;
+        height: 450px; /* Megfelelő magasság a tartalom mellett */
+        border-radius: 20px;
+        overflow: hidden;
+        margin-bottom: 25px;
+        background-color: #2c1e1a;
+        shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    .hero-bg-layer {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background-size: cover;
+        background-position: center;
+        transition: opacity 0.8s ease-in-out;
+        z-index: 1;
+    }
+    .hero-overlay {
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.1);
+        z-index: 2;
+    }
+    .hero-dots {
+        position: absolute;
+        bottom: 15px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 8px;
+        z-index: 10;
+        background: rgba(0,0,0,0.2);
+        padding: 5px 12px;
+        border-radius: 20px;
+        backdrop-filter: blur(4px);
+    }
+    .dot {
+        width: 10px;
+        height: 10px;
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: 50%;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+    .dot.active {
+        background: white;
+        transform: scale(1.2);
+    }
+</style>
+
 <div class="row">
     <div class="col-md-7">
         <h1 class="display-5 fw-bold mb-3">{{ room.name }}</h1>
-        <div class="rounded-4 overflow-hidden mb-4 shadow">
-            <img src="{{ url_for('static', filename=room.image) }}" class="img-fluid w-100" alt="{{ room.name }}">
+        
+        <div id="room-slider" class="room-hero-wrap shadow">
+            <div id="bg-1" class="hero-bg-layer" style="opacity: 1;"></div>
+            <div id="bg-2" class="hero-bg-layer" style="opacity: 0;"></div>
+            <div class="hero-overlay"></div>
+            <div class="hero-dots">
+                <div class="dot active" data-index="0"></div>
+                <div class="dot" data-index="1"></div>
+                <div class="dot" data-index="2"></div>
+            </div>
         </div>
+        
         <p class="fs-5">{{ room.description }}</p>
     </div>
+    
     <div class="col-md-5">
         <div class="card p-4 shadow border-0">
             <h3 class="mb-2">Időpont foglalása</h3>
@@ -74,7 +141,55 @@
 
 {% block scripts %}
 <script>
-    // Flatpickr naptár beállítások
+    // KÉPVÁLTÓ LOGIKA
+    document.addEventListener('DOMContentLoaded', function() {
+        const images = [
+    "/static/images/szoba{{ room.id }}_1.jpg",
+    "/static/images/szoba{{ room.id }}_2.jpg",
+    "/static/images/szoba{{ room.id }}_3.jpg"
+        ];
+
+        const layer1 = document.getElementById('bg-1');
+        const layer2 = document.getElementById('bg-2');
+        const dots = document.querySelectorAll('.dot');
+        
+        let currentIndex = 0;
+        let activeLayer = layer1;
+        let nextLayer = layer2;
+
+        layer1.style.backgroundImage = `url('${images[0]}')`;
+
+        function changeBg(targetIndex = null) {
+            if (targetIndex !== null) {
+                if (targetIndex === currentIndex) return;
+                currentIndex = targetIndex;
+            } else {
+                currentIndex = (currentIndex + 1) % images.length;
+            }
+            
+            nextLayer.style.backgroundImage = `url('${images[currentIndex]}')`;
+            activeLayer.style.opacity = 0;
+            nextLayer.style.opacity = 1;
+
+            dots.forEach(d => d.classList.remove('active'));
+            dots[currentIndex].classList.add('active');
+
+            [activeLayer, nextLayer] = [nextLayer, activeLayer];
+        }
+
+        let timer = setInterval(changeBg, 5000);
+
+        dots.forEach(dot => {
+            dot.addEventListener('click', () => {
+                const idx = parseInt(dot.getAttribute('data-index'));
+                clearInterval(timer);
+                changeBg(idx);
+                timer = setInterval(changeBg, 5000);
+            });
+        });
+    });
+
+    // EREDETI FOGLALÁSI SCRIPTEK
     const disabledRanges = {{ disabled_ranges | tojson }};
     const config = {
         locale: "hu",
@@ -85,32 +200,26 @@
     flatpickr("#start_date", config);
     flatpickr("#end_date", config);
 
-    // MEGERŐSÍTŐ FUNKCIÓK
     function showConfirmation() {
-        // Értékek kinyerése
         const name = document.getElementById('guest_name').value;
         const email = document.getElementById('guest_email').value;
         const start = document.getElementById('start_date').value;
         const end = document.getElementById('end_date').value;
 
-        // Ellenőrizzük, hogy ki van-e töltve minden
         if (!name || !email || !start || !end) {
             alert("Kérjük, töltsön ki minden mezőt a foglaláshoz!");
             return;
         }
 
-        // Adatok beírása a modalba
         document.getElementById('modal_name').innerText = name;
         document.getElementById('modal_email').innerText = email;
         document.getElementById('modal_dates').innerText = start + " - " + end;
 
-        // Modal megnyitása
         var myModal = new bootstrap.Modal(document.getElementById('confirmModal'));
         myModal.show();
     }
 
     function submitForm() {
-        // Az űrlap tényleges beküldése
         document.getElementById('bookingForm').submit();
     }
 </script>

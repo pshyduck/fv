@@ -2,108 +2,185 @@
 
 {% block content %}
 <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
 <style>
-    /* Hero szekció */
+    :root {
+        --accent-green: #689f38;
+        --glass-bg: rgba(255, 255, 255, 0.85);
+        --dark-overlay: rgba(0, 0, 0, 0.4);
+    }
+
+    /* Hero Szekció - Modernebb gradiens és elmosódás */
     .hero-wrap {
         position: relative;
-        height: 500px;
-        border-radius: 30px;
+        height: 80vh; 
+        border-radius: 40px;
         overflow: hidden;
-        margin-bottom: 50px;
+        margin: 20px 0 60px 0;
         display: flex;
         align-items: center;
         justify-content: center;
         color: white;
         text-align: center;
-        background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), 
-                    url('https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80');
-        background-size: cover;
-        background-position: center;
+        background-color: #000; /* Alapszín */
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
     }
 
-    .hero-content h1 {
-        font-family: 'Playfair Display', serif;
-        font-size: 3.5rem;
-        text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
-    }
-
-    /* Képnézegető animációhoz */
-    .zoom-container {
-        position: relative;
-        width: 100%;
-        max-width: 800px;
-        height: 450px;
-        margin: 30px auto;
-        overflow: hidden;
-        border-radius: 20px;
-        shadow: 0 10px 30px rgba(0,0,0,0.1);
-    }
-
-    .zoom-image {
+    /* Rétegek az átúszáshoz */
+    .hero-bg-layer {
         position: absolute;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        object-fit: cover;
-        transition: opacity 0.6s ease-in-out, transform 0.8s ease;
+        background-size: cover;
+        background-position: center;
+        transition: opacity 0.8s ease-in-out; 
+        z-index: 1;
     }
 
-    .image-hover { opacity: 0; }
-    .zoom-container:hover .image-main { opacity: 0; transform: scale(1.05); }
-    .zoom-container:hover .image-hover { opacity: 1; transform: scale(1.05); }
-
-    .feature-card {
-        padding: 30px;
-        border-radius: 20px;
-        background: white;
-        transition: transform 0.3s ease;
+    /* Fix sötétítő réteg a képek felett */
+    .hero-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
         height: 100%;
+        background: var(--dark-overlay);
+        z-index: 2;
     }
-    .feature-card:hover { transform: translateY(-10px); }
-    .feature-icon { font-size: 2.5rem; color: #689f38; margin-bottom: 15px; display: block; }
+
+    .hero-content {
+        position: relative;
+        z-index: 3; /* Tartalom legfelül */
+    }
+
+    .hero-content h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: clamp(2.5rem, 8vw, 4.5rem);
+        margin-bottom: 20px;
+        letter-spacing: -1px;
+    }
+
+    /* ÚJ: Navigációs pöttyök stílusa */
+    .hero-dots {
+        position: absolute;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 12px;
+        z-index: 4;
+        background: rgba(0, 0, 0, 0.2);
+        padding: 10px 18px;
+        border-radius: 50px;
+        backdrop-filter: blur(5px);
+    }
+
+    .dot {
+        width: 12px;
+        height: 12px;
+        background: rgba(255, 255, 255, 0.4);
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .dot.active {
+        background: white;
+        transform: scale(1.3);
+    }
+
+    /* Feature Kártyák */
+    .feature-card {
+        padding: 40px 30px;
+        border-radius: 30px;
+        background: var(--glass-bg);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        transition: all 0.4s ease;
+        height: 100%;
+        text-align: center;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-15px);
+        background: white;
+        box-shadow: 0 30px 60px rgba(0,0,0,0.1);
+    }
+
+    .feature-icon {
+        font-size: 3rem;
+        background: linear-gradient(135deg, #8bc34a, #689f38);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 20px;
+        display: inline-block;
+    }
+
+    .btn-modern {
+        background: white;
+        color: black;
+        padding: 18px 45px;
+        border-radius: 100px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s;
+        border: none;
+    }
+
+    .btn-modern:hover {
+        background: var(--accent-green);
+        color: white;
+        transform: scale(1.05);
+        box-shadow: 0 10px 20px rgba(104, 159, 56, 0.3);
+    }
 </style>
 
-<div class="hero-wrap" data-aos="fade-zoom-in" data-aos-duration="1500">
-    <div class="hero-content" data-aos="fade-down" data-aos-delay="300">
-        <h1>Füzesi Vendégház</h1>
-        <p class="fs-4">Nyugalom, természet, kikapcsolódás Veszprém szívében</p>
-        <a href="{{ url_for('rooms') }}" class="btn btn-light btn-lg px-5 py-3 mt-3 fw-bold rounded-pill shadow">Foglalás most</a>
+<div class="container-fluid px-4">
+    <div id="hero-bg" class="hero-wrap" data-aos="zoom-out" data-aos-duration="1500">
+        <div id="bg-1" class="hero-bg-layer" style="opacity: 1;"></div>
+        <div id="bg-2" class="hero-bg-layer" style="opacity: 0;"></div>
+        <div class="hero-overlay"></div>
+
+        <div class="hero-content">
+            <h1 data-aos="fade-up" data-aos-delay="200">Füzesi Vendégház</h1>
+            <div data-aos="fade-up" data-aos-delay="600">
+                <a href="{{ url_for('rooms') }}" class="btn btn-modern shadow">Foglalj most</a>
+            </div>
+        </div>
+
+        <div class="hero-dots">
+            <div class="dot active" data-index="0"></div>
+            <div class="dot" data-index="1"></div>
+            <div class="dot" data-index="2"></div>
+        </div>
     </div>
+
+    <div class="content-bg-section" style="background-image: url('https://images.unsplash.com/photo-1516594798947-e65505dbb29d?auto=format&fit=crop&w=1920&q=80'); background-size: cover;">
+    <div class="container">
+        </div>
 </div>
 
-<div class="text-center my-5 py-4">
-    <h3 class="fw-bold" data-aos="fade-up" data-aos-delay="200">Nézzen szét nálunk!</h3>
-    <p class="text-muted small mb-4" data-aos="fade-up" data-aos-delay="400">Húzza az egeret a képre a belső nézethez</p>
-    
-    <div class="zoom-container" data-aos="fade-up" data-aos-duration="1200" data-aos-delay="600">
-        <img src="https://images.unsplash.com/photo-1449156001935-d2861525a065?auto=format&fit=crop&w=800&q=80" class="zoom-image image-main" alt="Külső nézet">
-        <img src="https://images.unsplash.com/photo-1584132967334-10e028bd69f7?auto=format&fit=crop&w=800&q=80" class="zoom-image image-hover" alt="Belső nézet">
-    </div>
-</div>
-
-<div class="row g-4 my-5">
-    <div class="col-md-4 text-center" data-aos="fade-up" data-aos-delay="200">
-        <div class="feature-card shadow-sm">
-            <i class="bi bi-tree feature-icon"></i>
-            <h4>Zöld környezet</h4>
-            <p class="text-muted">Hatalmas kert, friss levegő és madárcsicsergés várja.</p>
+    <div class="row g-4 mb-6">
+        {% set features = [
+            {'icon': 'bi-map', 'title': 'Kiváló Elhelyezkedés', 'text': 'Veszprém vára és a Bakony legszebb ösvényei karnyújtásnyira.', 'delay': 200},
+            {'icon': 'bi-p-circle', 'title': 'Ingyenes Parkolás', 'text': 'Zárt, biztonságos udvari parkoló minden vendégünk részére.Illetve garázs motorok és biciklik számára.', 'delay': 400},
+            {'icon': 'bi-house-heart', 'title': 'Kisállat Barát', 'text': 'Nálunk a négylábú kedvenceket is szívesen látjuk.', 'delay': 600}
+        ] %}
+        
+        {% for feature in features %}
+        <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="{{ feature.delay }}">
+            <div class="feature-card">
+                <i class="bi {{ feature.icon }} feature-icon"></i>
+                <h4 class="fw-bold">{{ feature.title }}</h4>
+                <p class="text-muted mb-0">{{ feature.text }}</p>
+            </div>
         </div>
-    </div>
-    <div class="col-md-4 text-center" data-aos="fade-up" data-aos-delay="400">
-        <div class="feature-card shadow-sm">
-            <i class="bi bi-wifi feature-icon"></i>
-            <h4>Modern felszereltség</h4>
-            <p class="text-muted">Ingyenes WiFi, síkképernyős TV és teljesen felszerelt konyha.</p>
-        </div>
-    </div>
-    <div class="col-md-4 text-center" data-aos="fade-up" data-aos-delay="600">
-        <div class="feature-card shadow-sm">
-            <i class="bi bi-geo-alt feature-icon"></i>
-            <h4>Kiváló elhelyezkedés</h4>
-            <p class="text-muted">Veszprém látnivalói és a Bakony túraútvonalai pár percre.</p>
-        </div>
+        {% endfor %}
     </div>
 </div>
 
@@ -113,8 +190,66 @@
         AOS.init({
             duration: 1000,
             once: true,
-            offset: 100
+            offset: 150,
+            easing: 'ease-out-quart'
         });
+
+        // --- SMOOTH ÁTÚSZÓ HERO KÉPVÁLTÓ SCRIPT NAVIGÁCIÓVAL ---
+        const images = [
+            'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80',
+            'https://images.unsplash.com/photo-1449156001935-d2861525a065?auto=format&fit=crop&w=1200&q=80',
+            '/static/images/boci.jpg',
+        ];
+
+        const layer1 = document.getElementById('bg-1');
+        const layer2 = document.getElementById('bg-2');
+        const dots = document.querySelectorAll('.dot');
+        
+        let currentIndex = 0;
+        let activeLayer = layer1;
+        let nextLayer = layer2;
+        let timer;
+
+        layer1.style.backgroundImage = `url('${images[0]}')`;
+
+        function updateDots(index) {
+            dots.forEach(d => d.classList.remove('active'));
+            dots[index].classList.add('active');
+        }
+
+        function changeBg(targetIndex = null) {
+            if (targetIndex !== null) {
+                if (targetIndex === currentIndex) return;
+                currentIndex = targetIndex;
+            } else {
+                currentIndex = (currentIndex + 1) % images.length;
+            }
+            
+            nextLayer.style.backgroundImage = `url('${images[currentIndex]}')`;
+            
+            activeLayer.style.opacity = 0;
+            nextLayer.style.opacity = 1;
+
+            updateDots(currentIndex);
+
+            [activeLayer, nextLayer] = [nextLayer, activeLayer];
+        }
+
+        function startInterval() {
+            timer = setInterval(changeBg, 4500); // 4.5 másodperc a gyorsabb tempóhoz
+        }
+
+        // Kattintás a pöttyökre
+        dots.forEach(dot => {
+            dot.addEventListener('click', () => {
+                const idx = parseInt(dot.dataset.index);
+                clearInterval(timer);
+                changeBg(idx);
+                startInterval();
+            });
+        });
+
+        startInterval();
     });
 </script>
 {% endblock %}
