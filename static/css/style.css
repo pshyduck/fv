@@ -188,3 +188,15 @@ footer .contact-info i {
     color: rgba(250, 246, 242, 0.6);
 }
 
+/* ... a többi kód változatlan ... */
+
+.room-text {
+    color: #4a3733 !important; /* Sötétebb barna a jobb olvashatóságért */
+    font-size: 1.1rem !important;
+    line-height: 1.6 !important;
+    font-weight: 500 !important;
+    margin-top: 15px;
+    display: block !important; /* Biztosítja, hogy ne tűnjön el */
+}
+
+/* NINCS TÖBB ZÁRÓJEL A VÉGÉN! */

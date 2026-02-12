@@ -53,8 +53,8 @@ with app.app_context():
 
 # ---- STATIKUS ADATOK (Szobák) ----
 rooms_data = [
-    {"id": 1, "name": "Kétágyas szoba", "description": "Kényelmes szoba 2 fő részére.", "image": "images/francia1.jpg"},
-    {"id": 2, "name": "Családi szoba", "description": "Tágas szoba 4 főnek.", "image": "images/ketagyas2.jpg"},
+    {"id": 1, "name": "Kétágyas szoba", "description": "Kényelmes szoba 2 fő részére.", "image": "images/szoba1_1.jpg"},
+    {"id": 2, "name": "Családi szoba", "description": "Tágas szoba 3 főnek.", "image": "images/szoba2_1.jpg"},
 ]
 
 # ---- SEGÉDFÜGGVÉNY A SZABAD HELYEKHEZ ----
