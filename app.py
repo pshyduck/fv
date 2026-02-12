@@ -191,6 +191,41 @@ def admin_dashboard():
         return redirect(url_for("admin_login"))
     return render_template("admin_bookings.html", bookings=Booking.query.order_by(Booking.id.desc()).all())
 
+# --- ÚJ: Dátumok manuális blokkolása az admin felületről ---
+@app.route("/admin/block-date", methods=["POST"])
+def admin_block_date():
+    if not session.get("admin"): 
+        return redirect(url_for("admin_login"))
+    
+    room_name = request.form.get("room_name")
+    start_date = request.form.get("start_date")
+    end_date = request.form.get("end_date")
+    
+    # Dátumok ellenőrzése
+    if not start_date or not end_date or start_date >= end_date:
+        flash("Hiba: Érvénytelen dátumok! Az érkezésnek korábban kell lennie a távozásnál.", "danger")
+        return redirect(url_for("admin_dashboard"))
+    
+    # Új "foglalás" létrehozása ADMIN névvel, ami azonnal jóváhagyott
+    block = Booking(
+        room_name=room_name,
+        name="⚠️ ADMIN LEZÁRÁS",
+        email=ADMIN_EMAIL or "admin@fuzesivendeghaz.hu",
+        start_date=start_date,
+        end_date=end_date,
+        status="approved" # Ez teszi foglaltá a naptárban
+    )
+    
+    try:
+        db.session.add(block)
+        db.session.commit()
+        flash(f"Sikeresen lezárva: {room_name} ({start_date} - {end_date})", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Hiba történt a mentés során: {str(e)}", "danger")
+        
+    return redirect(url_for("admin_dashboard"))
+
 @app.route("/admin/approve/<int:booking_id>")
 def admin_approve(booking_id):
     if not session.get("admin"): 
