@@ -52,11 +52,21 @@ with app.app_context():
     db.create_all()
 
 # ---- STATIKUS ADATOK (Szobák) ----
+# app.py fájlban
 rooms_data = [
-    {"id": 1, "name": "Kétágyas szoba", "description": "Kényelmes szoba 2 fő részére.", "image": "images/szoba1_1.jpg"},
-    {"id": 2, "name": "Családi szoba", "description": "Tágas szoba 3 főnek.", "image": "images/szoba2_1.jpg"},
+    {
+        "id": 1, 
+        "name": "Franciaágyas szoba", 
+        "description": "Ez az első sor. \n Ez pedig már a második sor, amit az enter \n választ el.", 
+        "image": "images/szoba1_1.jpg"
+    },
+    {
+        "id": 2, 
+        "name": "Kétágyas szoba", 
+        "description": ".\nIdeális választás családok részére.", 
+        "image": "images/szoba2_1.jpg"
+    },
 ]
-
 # ---- SEGÉDFÜGGVÉNY A SZABAD HELYEKHEZ ----
 def get_available_dates(room_name, days=30):
     today = datetime.now().date()

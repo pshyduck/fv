@@ -9,12 +9,12 @@
     .room-hero-wrap {
         position: relative;
         width: 100%;
-        height: 450px; /* Megfelelő magasság a tartalom mellett */
+        height: 450px;
         border-radius: 20px;
         overflow: hidden;
         margin-bottom: 25px;
         background-color: #2c1e1a;
-        shadow: 0 10px 30px rgba(0,0,0,0.1);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
     }
     .hero-bg-layer {
         position: absolute;
@@ -55,13 +55,21 @@
         background: white;
         transform: scale(1.2);
     }
+
+    /* Leírás ablak stílusa */
+    .custom-description-window {
+        background: #ffffff;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        border-left: 5px solid #689f38;
+        margin-top: 20px;
+    }
 </style>
 
 <div class="row">
     <div class="col-md-7">
-        <h1 class="display-5 fw-bold mb-3">{{ room.name }}</h1>
-        
-        <div id="room-slider" class="room-hero-wrap shadow">
+        <div id="room-slider" class="room-hero-wrap">
             <div id="bg-1" class="hero-bg-layer" style="opacity: 1;"></div>
             <div id="bg-2" class="hero-bg-layer" style="opacity: 0;"></div>
             <div class="hero-overlay"></div>
@@ -69,10 +77,15 @@
                 <div class="dot active" data-index="0"></div>
                 <div class="dot" data-index="1"></div>
                 <div class="dot" data-index="2"></div>
+                <div class="dot" data-index="3"></div>
             </div>
         </div>
-        
-        <p class="fs-5">{{ room.description }}</p>
+         
+            <div style="background: #ffffff; border-radius: 15px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-left: 5px solid #689f38;">
+    <p style="color: #2e7d32; font-size: 1.25rem; line-height: 1.6; font-weight: 500; margin: 0; white-space: pre-line;">
+        {{ room.description }}
+    </p>
+</div>
     </div>
     
     <div class="col-md-5">
@@ -141,12 +154,13 @@
 
 {% block scripts %}
 <script>
-    // KÉPVÁLTÓ LOGIKA
+    // KÉPVÁLTÓ LOGIKA (4 KÉPPEL)
     document.addEventListener('DOMContentLoaded', function() {
         const images = [
-    "/static/images/szoba{{ room.id }}_1.jpg",
-    "/static/images/szoba{{ room.id }}_2.jpg",
-    "/static/images/szoba{{ room.id }}_3.jpg"
+            "/static/images/szoba{{ room.id }}_1.jpg",
+            "/static/images/szoba{{ room.id }}_2.jpg",
+            "/static/images/szoba{{ room.id }}_3.jpg",
+            "/static/images/szoba{{ room.id }}_4.jpg"
         ];
 
         const layer1 = document.getElementById('bg-1');
@@ -157,6 +171,7 @@
         let activeLayer = layer1;
         let nextLayer = layer2;
 
+        // Első kép beállítása
         layer1.style.backgroundImage = `url('${images[0]}')`;
 
         function changeBg(targetIndex = null) {
@@ -172,7 +187,9 @@
             nextLayer.style.opacity = 1;
 
             dots.forEach(d => d.classList.remove('active'));
-            dots[currentIndex].classList.add('active');
+            if(dots[currentIndex]) {
+                dots[currentIndex].classList.add('active');
+            }
 
             [activeLayer, nextLayer] = [nextLayer, activeLayer];
         }
@@ -189,7 +206,7 @@
         });
     });
 
-    // EREDETI FOGLALÁSI SCRIPTEK
+    // FLATPIKRR ÉS FOGLALÁS
     const disabledRanges = {{ disabled_ranges | tojson }};
     const config = {
         locale: "hu",

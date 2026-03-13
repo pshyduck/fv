@@ -12,7 +12,7 @@
         --dark-overlay: rgba(0, 0, 0, 0.4);
     }
 
-    /* Hero Szekció - Modernebb gradiens és elmosódás */
+    /* Hero Szekció */
     .hero-wrap {
         position: relative;
         height: 80vh; 
@@ -24,37 +24,29 @@
         justify-content: center;
         color: white;
         text-align: center;
-        background-color: #000; /* Alapszín */
+        background-color: #000;
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
     }
 
-    /* Rétegek az átúszáshoz */
     .hero-bg-layer {
         position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
+        top: 0; left: 0; width: 100%; height: 100%;
         background-size: cover;
         background-position: center;
         transition: opacity 0.8s ease-in-out; 
         z-index: 1;
     }
 
-    /* Fix sötétítő réteg a képek felett */
     .hero-overlay {
         position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
+        top: 0; left: 0; width: 100%; height: 100%;
         background: var(--dark-overlay);
         z-index: 2;
     }
 
     .hero-content {
         position: relative;
-        z-index: 3; /* Tartalom legfelül */
+        z-index: 3;
     }
 
     .hero-content h1 {
@@ -64,7 +56,6 @@
         letter-spacing: -1px;
     }
 
-    /* ÚJ: Navigációs pöttyök stílusa */
     .hero-dots {
         position: absolute;
         bottom: 30px;
@@ -93,7 +84,7 @@
         transform: scale(1.3);
     }
 
-    /* Feature Kártyák */
+    /* Feature Kártyák - 4 kártyához igazított col-lg-3 */
     .feature-card {
         padding: 40px 30px;
         border-radius: 30px;
@@ -130,6 +121,8 @@
         letter-spacing: 1px;
         transition: all 0.3s;
         border: none;
+        text-decoration: none;
+        display: inline-block;
     }
 
     .btn-modern:hover {
@@ -160,20 +153,16 @@
         </div>
     </div>
 
-    <div class="content-bg-section" style="background-image: url('https://images.unsplash.com/photo-1516594798947-e65505dbb29d?auto=format&fit=crop&w=1920&q=80'); background-size: cover;">
-    <div class="container">
-        </div>
-</div>
-
-    <div class="row g-4 mb-6">
+    <div class="row g-4 mb-5">
         {% set features = [
-            {'icon': 'bi-map', 'title': 'Kiváló Elhelyezkedés', 'text': 'Veszprém vára és a Bakony legszebb ösvényei karnyújtásnyira.', 'delay': 200},
-            {'icon': 'bi-p-circle', 'title': 'Ingyenes Parkolás', 'text': 'Zárt, biztonságos udvari parkoló minden vendégünk részére.Illetve garázs motorok és biciklik számára.', 'delay': 400},
-            {'icon': 'bi-house-heart', 'title': 'Kisállat Barát', 'text': 'Nálunk a négylábú kedvenceket is szívesen látjuk.', 'delay': 600}
+            {'icon': 'bi-map', 'title': 'Kiváló Elhelyezkedés', 'text': 'Balaton és a Bakony legszebb ösvényei karnyújtásnyira.', 'delay': 200},
+            {'icon': 'bi-bicycle', 'title': 'Ingyenes Parkolás', 'text': 'Zárt udvari parkoló, illetve garázs motorok és biciklik számára.', 'delay': 400},
+            {'icon': 'bi-house-heart', 'title': 'Kisállat Barát', 'text': 'Nálunk a négylábú kedvenceket is szívesen látjuk.', 'delay': 600},
+            {'icon': 'bi-tags', 'title': 'Motoros kedvezmény', 'text': 'Motorral érkező vendégeink számára 5% kedvezményt biztosítunk.', 'delay': 800}
         ] %}
         
         {% for feature in features %}
-        <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="{{ feature.delay }}">
+        <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="{{ feature.delay }}">
             <div class="feature-card">
                 <i class="bi {{ feature.icon }} feature-icon"></i>
                 <h4 class="fw-bold">{{ feature.title }}</h4>
@@ -194,7 +183,6 @@
             easing: 'ease-out-quart'
         });
 
-        // --- SMOOTH ÁTÚSZÓ HERO KÉPVÁLTÓ SCRIPT NAVIGÁCIÓVAL ---
         const images = [
             '/static/images/terasz.jpg',
             '/static/images/lepcso.jpg',
@@ -214,7 +202,7 @@
 
         function updateDots(index) {
             dots.forEach(d => d.classList.remove('active'));
-            dots[index].classList.add('active');
+            if(dots[index]) dots[index].classList.add('active');
         }
 
         function changeBg(targetIndex = null) {
@@ -226,23 +214,20 @@
             }
             
             nextLayer.style.backgroundImage = `url('${images[currentIndex]}')`;
-            
             activeLayer.style.opacity = 0;
             nextLayer.style.opacity = 1;
-
             updateDots(currentIndex);
 
             [activeLayer, nextLayer] = [nextLayer, activeLayer];
         }
 
         function startInterval() {
-            timer = setInterval(changeBg, 4500); // 4.5 másodperc a gyorsabb tempóhoz
+            timer = setInterval(changeBg, 4500);
         }
 
-        // Kattintás a pöttyökre
         dots.forEach(dot => {
             dot.addEventListener('click', () => {
-                const idx = parseInt(dot.dataset.index);
+                const idx = parseInt(dot.getAttribute('data-index'));
                 clearInterval(timer);
                 changeBg(idx);
                 startInterval();
